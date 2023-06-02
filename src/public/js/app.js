@@ -15,11 +15,11 @@ function addMessage(message) {
   ul.appendChild(li);
 }
 
-function showRoom() {
+function showRoom(newCount) {
   welcome.hidden = true;
   room.hidden = false;
   const h3 = room.querySelector("h3");
-  h3.innerText = `Room ${roomName}`;
+  h3.innerText = `Room ${roomName} (${newCount})`;
   const msgForm = room.querySelector("#msg");
   msgForm.addEventListener("submit", handleMessageSubmit);
 }
@@ -45,12 +45,31 @@ function handleMessageSubmit(event) {
 
 form.addEventListener("submit", handleEnterSubmit);
 
-socket.on("welcome", (user) => {
+socket.on("welcome", (user, newCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (${newCount})`;
   addMessage(`${user} arrived!`);
+});
+
+socket.on("room_change", (rooms) => {
+  console.log(rooms);
+  const roomList = welcome.querySelector("ul");
+
+  roomList.innerHTML = "";
+  if (rooms.length === 0) {
+    return;
+  }
+  rooms.forEach((room) => {
+    const li = document.createElement("li");
+    li.innerText = room;
+    roomList.appendChild(li);
+  });
 });
 
 socket.on("new_message", addMessage);
 
-socket.on("bye", (user) => {
+socket.on("bye", (user, newCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (${newCount})`;
   addMessage(`${user} left ㅠㅠ`);
 });
